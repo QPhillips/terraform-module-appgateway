@@ -10,42 +10,7 @@ locals {
 
 # frontend_port_name             = format("%s_application_gateway_%s_feport", var.network_shortname, var.deploy_environment)
 # frontend_ip_configuration_name = format("%s_application_gateway_%s_feip", var.network_shortname, var.deploy_environment)
-
-
-  criticality = {
-    sbox     = "Low"
-    aat      = "High"
-    stg      = "High"
-    prod     = "High"
-    ithc     = "Medium"
-    test     = "Medium"
-    perftest = "Medium"
-    demo     = "Medium"
-    dev      = "Low"
-  }
-
-  env_display_names = {
-    sbox     = "Sandbox"
-    aat      = "Staging"
-    stg      = "Staging"
-    prod     = "Production"
-    ithc     = "ITHC"
-    test     = "Test"
-    perftest = "Test"
-    dev      = "Development"
-    demo     = "Demo"
-  }
-
-  common_tags = {
-    "managedBy"          = "SS DevOps"
-    "solutionOwner"      = "Shared Services"
-    "activityName"       = var.activity_name
-    "dataClassification" = "Internal"
-    "automation"         = "SS AKS Build Infrastructure"
-    "costCentre"         = "ss-aks" // until we get a better one, this is the generic cft contingency one
-    "environment"        = local.env_display_names[var.environment]
-    "criticality"        = local.criticality[var.environment]
-  }
+  frontend_prefix = join("-", compact(["fe",var.cluster_number ]))
 }
 
 
