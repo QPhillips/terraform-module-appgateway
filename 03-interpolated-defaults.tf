@@ -8,9 +8,12 @@ locals {
 
   slug_location = lower(replace(var.location, " ", "."))
 
-# frontend_port_name             = format("%s_application_gateway_%s_feport", var.network_shortname, var.deploy_environment)
-# frontend_ip_configuration_name = format("%s_application_gateway_%s_feip", var.network_shortname, var.deploy_environment)
-  frontend_prefix = join("-", compact(["fe",var.cluster_number ]))
+  frontend_port_name             = format("%s-appgw-%s-feport", var.network_shortname, var.environment)
+  frontend_ip_configuration_name = format("%s-appgw-%s-feip", var.network_shortname, var.environment)
+  frontend_prefix                = join("-", compact(["fe",var.cluster_number ]))
+
+  x_fwded_proto_ruleset = "x_fwded_proto"
+
 }
 
 

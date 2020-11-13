@@ -1,40 +1,73 @@
-# resource "azurerm_application_gateway" "network" {
-#   name = format("%s-%s-%s-", var.network_shortname, var.deploy_environment)
-#   resource_group_name = var.resource_group_name
-#   location            = var.location
+resource "azurerm_application_gateway" "ag" {
+  name = format("%s-%s-%s-agw", var.network_shortname, var.environment,local.frontend_prefix)
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
 
-#   sku {
-#     name     = "Standard_v2"
-#     tier     = "Standard_v2"
-#     capacity = 2
-#   }
+  sku {
+    name     = "Standard_v2"
+    tier     = "Standard_v2"
+  }
 
-#   gateway_ip_configuration {
-#     name      = "appGatewayIpConfig"
-#     subnet_id = data.azurerm_subnet.application_gateway_subnet.id
-#   }
+  autoscale_configuration {
+    min_capacity = var.min_capacity
+    max_capacity = var.max_capacity
+  }
 
-#   frontend_port {
-#     name = local.frontend_port_name
-#     port = 80
-#   }
+  gateway_ip_configuration {
+    name      = "appgw_ipconfig"
+    subnet_id = var.app_gw_subnet_id
+  }
 
-#   frontend_port {
-#     name = "httpsPort"
-#     port = 443
-#   }
+  frontend_port {
+    name = local.frontend_port_name
+    port = 80
+  }
 
-#   frontend_ip_configuration {
-#     name                 = "${local.frontend_ip_configuration_name}_public"
-#     public_ip_address_id = azurerm_public_ip.appgw_pip.id
-#   }
+  frontend_port {
+    name = "httpsPort"
+    port = 443
+  }
 
-#   frontend_ip_configuration {
-#     name                 = "${local.frontend_ip_configuration_name}_private"
-#     private_ip_address_allocation = "Static"
-#     private_ip_address   = cidrhost(var.application_gateway_subnet_cidr_blocks, 123)
-#     subnet_id     = data.azurerm_subnet.application_gateway_subnet.id
-#   }
+  frontend_ip_configuration {
+    name                 = "${local.frontend_ip_configuration_name}_public"
+    public_ip_address_id = azurerm_public_ip.appgw_pip.id
+  }
+
+  frontend_ip_configuration {
+    name                 = "${local.frontend_ip_configuration_name}_private"
+    private_ip_address_allocation = "Static"
+    private_ip_address   = cidrhost(var.app_gw_subnet_cidr_blocks, 250)
+    subnet_id     = var.app_gw_subnet_id
+  }
+
+  backend_address_pool {
+    name="traefik-test"  
+  }
+
+   backend_http_settings {
+    name                  = "http_setting_default"
+    cookie_based_affinity = "Disabled"
+    path                  = "/"
+    port                  = 80
+    protocol              = "Http"
+    request_timeout       = 60
+  }
+
+  http_listener {
+    name                           = "default_listener"
+    frontend_ip_configuration_name = "${local.frontend_ip_configuration_name}_private"
+    frontend_port_name             = local.frontend_port_name
+    protocol                       = "Http"
+  }
+
+  request_routing_rule {
+    name                       = "default_rule"
+    rule_type                  = "Basic"
+    http_listener_name         = "default_listener"
+    backend_address_pool_name  = "traefik-test"
+    backend_http_settings_name = "http_setting_default"
+  }
 
 #   dynamic "backend_address_pool" {
 #     for_each = [for b in var.backend_apps : {
@@ -125,13 +158,5 @@
 #     }
 #   }
 
-#   tags = merge(
-#     data.null_data_source.tag_defaults.inputs,
-#     map(
-#       "Name", format("%s_%s_network",
-#         lookup(data.null_data_source.network_defaults.inputs, "name_prefix"),
-#         lookup(data.null_data_source.tag_defaults.inputs, "Environment")
-#       )
-#     )
-#   )
-# }
+  tags = var.tags
+}
