@@ -2,7 +2,6 @@ resource "azurerm_application_gateway" "ag" {
   name = format("%s-%s-%s-agw", var.network_shortname, var.environment,local.frontend_prefix)
   resource_group_name = var.resource_group_name
   location            = var.location
-  tags                = var.tags
 
   sku {
     name     = "Standard_v2"
