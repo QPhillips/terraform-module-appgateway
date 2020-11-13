@@ -30,7 +30,7 @@ resource "azurerm_application_gateway" "ag" {
 
   frontend_ip_configuration {
     name                 = "${local.frontend_ip_configuration_name}_public"
-    public_ip_address_id = azurerm_public_ip.appgw_pip.id
+    public_ip_address_id = azurerm_public_ip.appgw_pip[0].id
   }
 
   frontend_ip_configuration {
