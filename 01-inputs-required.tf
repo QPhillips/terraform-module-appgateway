@@ -33,14 +33,14 @@ variable "max_capacity" {
   default = 10
 }
 
-variable "private_ip_address" {
-  description = "IP address to allocate staticly to app gateway, must be in the subnet for the env"
-}
+# variable "private_ip_address" {
+#   description = "IP address to allocate staticly to app gateway, must be in the subnet for the env"
+#}
 
-variable "destinations" {
-  type        = list(string)
-  description = "List of IP addresses to direct traffic to"
-}
+# variable "destinations" {
+#   type        = list(string)
+#   description = "List of IP addresses to direct traffic to"
+# }
 
 
 variable "app_gw_subnet_id" {}
